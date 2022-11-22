@@ -1,0 +1,23 @@
+<div class="d-flex flex-column flex-shrink-0 p-3 text-white bg-dark" style="width: 280px;height: 100vh;">
+    <a href="/admin" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
+        <span class="fs-4"><%=userData[0].fullName%></span>
+    </a>
+    <hr>
+    <ul class="nav nav-pills flex-column mb-auto">
+        <% adminUrls.forEach((tab)=>{%>
+
+            <li class="nav-item">
+                <a class="nav-link text-white <%= activeRoute == tab ?" active":"" %> " href="<%=tab.url%>">
+                        <%=tab.label%>
+                </a>
+            </li>
+
+            <%}) %>
+    </ul>
+    <hr>
+    <form class="nav-item" action="<%=myRoutes.signOut.url %> " method="post">
+        <button class="btn  text-light">
+            <%=myRoutes.signOut.label %>
+        </button>
+    </form>
+</div>

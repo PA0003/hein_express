@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <%- include('../common/head') %>
+        <script>
+
+            addForm = () => {
+                $('#popUPModal').modal('show');
+                $('#popUpContent').html(`
+            <form action="<%=adminRoutes.users.url%>" method="post">
+                <input type="text" name="username" class="form-control" aria-label="username" placeholder="username">
+                <input type="text" name="fullName" class="form-control" aria-label="fullName" placeholder="fullName">
+                <input type="password" name="password" class="form-control" aria-label="password"
+                    placeholder="password">
+                <input type="text" name="email" class="form-control" aria-label="email" placeholder="email">
+                <input type="text" name="phone" class="form-control" aria-label="phone" placeholder="phone">
+                <button class="btn btn-primary form-control">Create</button>
+            </form>
+            `)
+            }
+            editForm = (data = null) => {
+                $('#popUPModal').modal('show');
+                $('#popUpContent').html(`
+                <form action="<%=adminRoutes.users.url%>" method="put">
+                <input value="${data.id}" type="hidden" name="id" />
+                <input value="${data.username}" type="text" name="username" class="form-control" aria-label="username" placeholder="username" disabled>
+                <input value="${data.fullName}" type="text" name="fullName" class="form-control" aria-label="fullName" placeholder="fullName">
+                <input value="${data.password}" type="password" name="password" class="form-control" aria-label="password"
+                    placeholder="password">
+                <input value="${data.email}" type="text" name="email" class="form-control" aria-label="email" placeholder="email">
+                <input value="${data.phone}" type="text" name="phone" class="form-control" aria-label="phone" placeholder="phone">
+                <button  class="btn btn-primary form-control">Update</button>
+            </form>
+            `)
+            }
+        </script>
+</head>
+
+<body>
+    <div class="row g-0">
+        <div class="col-3">
+            <div class="sticky-top">
+                <%- include('common/nav') %>
+            </div>
+        </div>
+        <div class="col-9">
+            <h1>User Manager</h1>
+            <button onclick="addForm()" class="btn btn-primary">New User</button>
+
+            <div class="modal fade" id="popUPModal" tabindex="-1" aria-labelledby="popUPModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content" id="popUpContent">
+                    </div>
+                </div>
+            </div>
+
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>id</th>
+                        <th>username</th>
+                        <th>password</th>
+                        <th>full name</th>
+                        <th>email</th>
+                        <th>phone</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <%users.forEach((user)=>{%>
+                        <tr onclick="editForm(<%=JSON.stringify(user)%>)">
+                            <td>
+                                <%=user.id %>
+                            </td>
+                            <td>
+                                <%=user.username %>
+                            </td>
+                            <td>
+                                <%=user.password %>
+                            </td>
+                            <td>
+                                <%=user.fullName %>
+                            </td>
+                            <td>
+                                <%=user.email %>
+                            </td>
+                            <td>
+                                <%=user.phone %>
+                            </td>
+                        </tr>
+                        <%})%>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <%- include('../common/footer') %>
+
+</body>
+
+</html>

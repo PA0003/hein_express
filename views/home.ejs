@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <%- include('common/head') %>
+</head>
+
+<body>
+    <%- include('common/nav') %>
+        <h1>
+            Welcome <%=data.fullName%>
+        </h1>
+        <div>
+            username : <%=data.username%><br />
+                age : <%=data.age%>
+
+        </div>
+
+        <%- include('common/footer') %>
+</body>
+
+</html>
