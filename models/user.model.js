@@ -1,15 +1,4 @@
-var mysql = require('mysql');
-
-var con = mysql.createConnection({
-    host: "localhost",
-    user: "root",
-    password: "",
-    database: "exercise"
-});
-
-con.connect(function (err) {
-    if (err) throw err;
-})
+const { con } = require("./conectSQL")
 
 // get all user
 exports.Users = (cb) => {
@@ -34,9 +23,18 @@ exports.Users = (cb) => {
 exports.UserCreate = (data, cb) => {
     var sql = `INSERT INTO users (fullName, username, password, email, phone) VALUES ('${data.fullName}','${data.username}', '${data.password}', '${data.email}','${data.phone}')`;
     con.query(sql, function (err, result) {
-        if (err) console.log(err);
-        cb(null, result)
-        console.log("1 user created", result);
+        if (err) {
+            cb(err, null)
+        } else {
+            con.query(`SELECT * FROM users WHERE id = "${result.insertId}"`, function (err, r) {
+                if (r.length == 1) {
+                    cb(null, r)
+                }
+                else {
+                    cb(r)
+                }
+            });
+        }
     });
 }
 // //whare
@@ -45,22 +43,15 @@ exports.UserCreate = (data, cb) => {
 //         console.log(result);
 //     });
 exports.findUserByUP = (params, cb) => {
-    con.query(`SELECT * FROM users WHERE username = "${params.username}" AND password = "${params.password}"`, function (err, result) {
+    con.query(`SELECT id,username, fullName, email, phone, role FROM users WHERE username = "${params.username}" AND password = "${params.password}"`, function (err, result) {
         if (result.length == 1) {
-            cb(null, result)
+            cb(null, result[0])
         }
         else {
             cb(result)
         }
     });
 }
-
-// //delete
-//     var sql = "DELETE FROM users WHERE id = '1'";
-//     con.query(sql, function (err, result) {
-//         if (err) throw err;
-//         console.log("Number of records deleted: " + result.affectedRows);
-//     });
 
 // update
 exports.UserUpdate = (parms, cb) => {
@@ -69,12 +60,30 @@ exports.UserUpdate = (parms, cb) => {
         if (err) {
             cb(err)
         } else {
-            cb(null, result)
+            con.query(`SELECT * FROM users WHERE id = "${parms.id}"`, function (err, r) {
+                if (r.length == 1) {
+                    cb(null, r)
+                }
+                else {
+                    cb(r)
+                }
+            });
         }
         // console.log(result.affectedRows + " record(s) updated");
     });
 }
 
+//delete
+exports.UserDelete = (params, cb) => {
+    var sql = `DELETE FROM users WHERE id = '${params.id}'`;
+    con.query(sql, function (err, result) {
+        if (err) {
+            cb(err)
+        } else {
+            cb(null, result)
+        };
+    });
+}
 
 
 

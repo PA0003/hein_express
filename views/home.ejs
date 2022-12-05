@@ -7,16 +7,117 @@
 
 <body>
     <%- include('common/nav') %>
-        <h1>
-            Welcome <%=data.fullName%>
-        </h1>
-        <div>
-            username : <%=data.username%><br />
-                age : <%=data.age%>
+    <%- include('common/popUpModel') %>
+    <%- include('common/toast') %>
+            <div class="row g-0">
+                <div class="col-3"></div>
+                <div class="col-6 px-5">
+                    <% if(isSignIn){ %>
+                        <div class="m-3 card">
+                            <button class="btn btn-primary" onclick="addPostForm()">Create New Post</button>
+                            <script>
+                                addPostForm = () => {
+                                    $('#popUPModal').modal('show');
+                                    $('#popUpContent').html(`
+                                    <form action="/api/posts" method="post" id="createPOst" class="postCreater p-3">
+                                        <input class="mt-2" type="text" name="title" placeholder="Title">
+                                        <textarea id="input_post_body" class="mt-2" name="body" placeholder="text"></textarea>
+                                        <button type="submit" class="mt-2 btn form-control btn-primary">Post</button>
+                                    </form>
+                                    `)
+                                    $('#input_post_body').on('input', function () {
+                                        this.style.resize= 'none';
+                                        this.style.height = (this.scrollHeight) + 'px';
+                                    });
+                                var frm = $('#createPOst');
 
-        </div>
+                                frm.submit(function (e) {
 
-        <%- include('common/footer') %>
+                                    e.preventDefault();
+
+                                    $('#popUpContent').html(`<div class="p-3">creating....</div>`)
+                                    $(".new").removeClass("new")
+                                    $.ajax({
+                                        type: frm.attr('method'),
+                                        url: frm.attr('action'),
+                                        data: frm.serialize(),
+                                        success: function (res) {
+                                            if (res.error) {
+                                                // $('#popUPModal').modal('hide');
+                                                $('#popUpContent').html(`<div class="p-3">Error</div>`);
+                                                // $('.toast').toast('show');
+
+                                            } else {
+                                                $('#popUPModal').modal('hide');
+                                                $('#popUpContent').html(``);
+                                                $('#toast_body').html(`new Post added`);
+                                                $('.toast').toast('show');
+                                                var post = `
+                                                <div class="card m-3 p-3 new">
+                                                    <div class="ms-auto">${res.user_fullName}</div>
+                                                    <h4>${res.title}</h4>
+                                                    <p>${res.body}</p>
+                                                    <hr/>
+                                                        <div class="d-flex justify-content-between">
+                                                        <buttom class="btn"><i class="fa-regular fa-heart"></i>like</buttom>
+                                                        <buttom class="btn"><i class="fa-regular fa-message"></i>comment</buttom>
+                                                        <buttom class="btn"><i class="fa-solid fa-share"></i>share</buttom>
+                                                    </div>
+                                                </div>
+                                                `
+                                                $('#posts').html(post + $('#posts').html())
+                                            }
+                                            frm.each(function () {
+                                                this.reset();
+                                            })
+                                            
+                                        },
+                                        error: function (res) {
+                                            console.log('An error occurred.');
+                                            console.log(res);
+                                        },
+                                    });
+                                });
+                            }
+                            </script>
+                        </div>
+                        <% }%>
+
+                            <div id="posts" class="posts">
+                            </div>
+                            <script>
+                                $.ajax({
+                                    type: 'GET',
+                                    url: '/api/posts',
+                                    success: function (res) {
+                                        res.forEach(function (r) {
+                                            var post =
+                                                `
+                                        <div class="card m-3 p-3">
+                                            <div class="ms-auto">${r.user_fullName}</div>
+                                            <h4>${r.title}</h4>
+                                            <p>${r.body}</p>
+                                            <hr/>
+                                                <div class="d-flex justify-content-between">
+                                                <buttom class="btn"><i class="fa-regular fa-heart"></i>like</buttom>
+                                                <buttom class="btn"><i class="fa-regular fa-message"></i>comment</buttom>
+                                                <buttom class="btn"><i class="fa-solid fa-share"></i>share</buttom>
+                                            </div>
+                                        </div>
+                                        `
+                                            $('#posts').html($('#posts').html() + post)
+                                        });
+                                    },
+                                    error: function (res) {
+                                        console.log('An error occurred.');
+                                        console.log(res);
+                                    },
+                                });
+                            </script>
+                </div>
+                <div class="col-3"></div>
+            </div>
+            <%- include('common/footer') %>
 </body>
 
 </html>

@@ -38,7 +38,7 @@ exports.postSignin = (req, res) => {
             req.session.isSignIn = true;
             req.session.userData = data;
             req.session.save(() => {
-                res.redirect(myRoutes.admin.url);
+                res.redirect(myRoutes.home.url);
             });
         }
     });

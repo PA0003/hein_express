@@ -6,7 +6,6 @@ exports.pageAdminHome = function (req, res) {
     res.render(
         'admin/index',
         {
-
             activeRoute: myRoutes.admin,
             meta: {
                 title: "Admin",

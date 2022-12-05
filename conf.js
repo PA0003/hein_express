@@ -25,3 +25,7 @@ exports.mainNav= [
     this.myRoutes.home,
     this.myRoutes.pnf
 ];
+
+exports.apiRoutes = {
+    users:'/api/users'
+}

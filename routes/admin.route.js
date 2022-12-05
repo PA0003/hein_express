@@ -18,6 +18,4 @@ router.use(function (req, res, next) {
 })
 router.get('/', pageAdminHome);
 router.get('/users', pageAdminUser);
-router.post('/users', userCreate);
-router.put('/users', userUpdate);
 module.exports = router;

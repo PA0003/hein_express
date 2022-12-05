@@ -8,92 +8,248 @@
             addForm = () => {
                 $('#popUPModal').modal('show');
                 $('#popUpContent').html(`
-            <form action="<%=adminRoutes.users.url%>" method="post">
-                <input type="text" name="username" class="form-control" aria-label="username" placeholder="username">
-                <input type="text" name="fullName" class="form-control" aria-label="fullName" placeholder="fullName">
-                <input type="password" name="password" class="form-control" aria-label="password"
-                    placeholder="password">
-                <input type="text" name="email" class="form-control" aria-label="email" placeholder="email">
-                <input type="text" name="phone" class="form-control" aria-label="phone" placeholder="phone">
-                <button class="btn btn-primary form-control">Create</button>
+            <form class="px-3" id="addUserForm" method="post" action="/api/users">
+                <center class="h2 py-4">New User</center>
+                <input type="text" name="username" class="form-control my-3" aria-label="username" placeholder="username" required>
+                <input type="text" name="fullName" class="form-control my-3" aria-label="fullName" placeholder="Full Name" required>
+                <input type="password" name="password" class="form-control my-3" aria-label="password" placeholder="password" required>
+                <input type="text" name="email" class="form-control my-3" aria-label="email" placeholder="email" required>
+                <input type="text" name="phone" class="form-control my-3" aria-label="phone" placeholder="phone" required>
+                <button class="btn btn-primary form-control my-3">Create</button>
             </form>
             `)
+
+                var frm = $('#addUserForm');
+
+                frm.submit(function (e) {
+
+                    e.preventDefault();
+
+                    $('#popUpContent').html(`<div class="p-3">creating....</div>`)
+                    $.ajax({
+                        type: frm.attr('method'),
+                        url: frm.attr('action'),
+                        data: frm.serialize(),
+                        success: function (res) {
+                            if (res.error) {
+                                // $('#popUPModal').modal('hide');
+                                $('#popUpContent').html(`<div class="p-3">username has already exited, choose different username</div>`);
+                                // $('.toast').toast('show');
+                                
+                            } else {
+                                $('#popUpContent').html(`${res[0].fullName} has been added.`)
+                                $('#popUPModal').modal('hide');
+                                Array.prototype.push.apply(users, res);
+                                console.log(users);
+                                $('#userTable').DataTable().clear().draw();
+                                $('#userTable').DataTable().rows.add(users).draw();
+                                $('#toast_body').html(`new User "${res[0].fullName}" has been added`);
+                                $('.toast').toast('show');
+                            }
+                        },
+                        error: function (res) {
+                            console.log('An error occurred.');
+                            console.log(res);
+                        },
+                    });
+                });
             }
             editForm = (data = null) => {
                 $('#popUPModal').modal('show');
                 $('#popUpContent').html(`
-                <form action="<%=adminRoutes.users.url%>" method="put">
+                <form class="px-3" id="updateUserForm" action="/api/users" method="put">
+                    <center class="h2">Edit ${data.fullName}</center>
                 <input value="${data.id}" type="hidden" name="id" />
-                <input value="${data.username}" type="text" name="username" class="form-control" aria-label="username" placeholder="username" disabled>
-                <input value="${data.fullName}" type="text" name="fullName" class="form-control" aria-label="fullName" placeholder="fullName">
-                <input value="${data.password}" type="password" name="password" class="form-control" aria-label="password"
-                    placeholder="password">
-                <input value="${data.email}" type="text" name="email" class="form-control" aria-label="email" placeholder="email">
-                <input value="${data.phone}" type="text" name="phone" class="form-control" aria-label="phone" placeholder="phone">
-                <button  class="btn btn-primary form-control">Update</button>
+                <input value="${data.username}" type="text" name="username" class="form-control my-3" aria-label="username" placeholder="username" disabled required>
+                <input value="${data.fullName}" type="text" name="fullName" class="form-control my-3" aria-label="fullName" placeholder="fullName" required>
+                <input value="${data.password}" type="password" name="password" class="form-control my-3" aria-label="password" placeholder="password" required>
+                <input value="${data.email}" type="text" name="email" class="form-control my-3" aria-label="email" placeholder="email" required>
+                <input value="${data.phone}" type="text" name="phone" class="form-control my-3" aria-label="phone" placeholder="phone" required>
+                <button  class="btn btn-primary form-control my-3">Update</button>
             </form>
             `)
+
+                var frm = $('#updateUserForm');
+
+                frm.submit(function (e) {
+
+                    e.preventDefault();
+                    
+                    $('#popUpContent').html(`<div class="p-3">updating....</div>`)
+
+                    $.ajax({
+                        type: frm.attr('method'),
+                        url: frm.attr('action'),
+                        data: frm.serialize(),
+                        success: function (res) {
+                            $('#popUPModal').modal('hide');
+                            const index = users.findIndex(x => x.id === data.id)
+                            users[index] = res[0];
+                            $('#userTable').DataTable().clear().draw();
+                            $('#userTable').DataTable().rows.add(users).draw();
+                            $('#toast_body').html(`<i>username:"${data.username}"</i> has been updated`);
+                            $('.toast').toast('show');
+                        },
+                        error: function (data) {
+                            console.log('An error occurred.');
+                            console.log(data);
+                        },
+                    });
+                });
             }
+            deleteForm = (data = null) => {
+                $('#popUPModal').modal('show');
+                $('#popUpContent').html(`
+                <div class="p-3">
+                    <div class="h3">Delete?</div>
+                    <div class="h2">${data.fullName}</div>
+                </div>
+                <form class="px-3" id="deleteUserForm" action="/api/users" method="delete">
+                    <input value="${data.id}" type="hidden" name="id" />
+                    <button  class="btn btn-primary form-control my-3">Delete</button>
+                </form>
+            `)
+
+                var frm = $('#deleteUserForm');
+
+                frm.submit(function (e) {
+
+                    e.preventDefault();
+                    
+                    $('#popUpContent').html(`<div class="p-3">deleting....</div>`)
+
+                    $.ajax({
+                        type: frm.attr('method'),
+                        url: frm.attr('action'),
+                        data: frm.serialize(),
+                        success: function (res) {
+                            $('#popUPModal').modal('hide');
+                            const index = users.findIndex(x => x.id === data.id)
+                            if (index > -1) { // only splice array when item is found
+                                users.splice(index, 1); // 2nd parameter means remove one item only
+                            }
+                            console.log(`index is ${index}`);
+                            $('#userTable').DataTable().clear().draw();
+                            $('#userTable').DataTable().rows.add(users).draw();
+                            $('#toast_body').html(`<b>"${data.fullName}"</b> has been deleted`);
+                            $('.toast').toast('show');
+
+                        },
+                        error: function (data) {
+                            console.log('An error occurred.');
+                            console.log(data);
+                        },
+                    });
+                });
+            }
+
         </script>
 </head>
 
 <body>
-    <div class="row g-0">
-        <div class="col-3">
-            <div class="sticky-top">
-                <%- include('common/nav') %>
-            </div>
-        </div>
-        <div class="col-9">
-            <h1>User Manager</h1>
-            <button onclick="addForm()" class="btn btn-primary">New User</button>
-
-            <div class="modal fade" id="popUPModal" tabindex="-1" aria-labelledby="popUPModalLabel" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content" id="popUpContent">
-                    </div>
+    
+    <%- include('../common/nav') %>
+    <%- include('../common/popUpModel') %>
+    <%- include('../common/toast') %>
+        <div class="row g-0">
+            <div class="col-2">
+                <div class="sticky-top">
+                    <%- include('common/nav') %>
                 </div>
             </div>
+            <div class="col-10">
+                <div class="p-sm-2 p-md-3">
+                    <h1>User Manager</h1>
+                    <button onclick="addForm()" class="btn btn-primary"><i class="fa-solid fa-user-plus"></i> New
+                        User</button>
+                </div>
+                <div class="p-sm-2 p-md-3">
+                    <center id="userTableStatus"></center>
+                    <table class="table" id="userTable">
+                        <thead>
+                            <tr>
+                                <th class="text-right">id</th>
+                                <th>username</th>
+                                <th>full name</th>
+                                <th>email</th>
+                                <th>phone</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+                <script>
+                    var users = [];
+                    $('#userTableStatus').html('loading..');
 
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>id</th>
-                        <th>username</th>
-                        <th>password</th>
-                        <th>full name</th>
-                        <th>email</th>
-                        <th>phone</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <%users.forEach((user)=>{%>
-                        <tr onclick="editForm(<%=JSON.stringify(user)%>)">
-                            <td>
-                                <%=user.id %>
-                            </td>
-                            <td>
-                                <%=user.username %>
-                            </td>
-                            <td>
-                                <%=user.password %>
-                            </td>
-                            <td>
-                                <%=user.fullName %>
-                            </td>
-                            <td>
-                                <%=user.email %>
-                            </td>
-                            <td>
-                                <%=user.phone %>
-                            </td>
-                        </tr>
-                        <%})%>
-                </tbody>
-            </table>
+                    $.ajax({
+                        type: 'get',
+                        url: '<%=apiRoutes.users%>',
+                        // data: frm.serialize(),
+                        success: function (data) {
+                            users = data;
+                            $('#userTableStatus').html('')
+                            // $('#userTable').DataTable().clear().draw();
+                            // $('#userTable').DataTable().rows.add(users).draw();
+
+                            $(document).ready(function () {
+                                // observe(users, function (users) {
+                                var columns = [
+                                    {
+                                        "data": null,
+                                        "render": function (data, type, row) {
+                                            return `  
+                                <span class="dropdown">
+                                    <i type="button" class="px-2 fa-solid fa-ellipsis-vertical" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false"></i>
+                                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                                        <li onclick='editForm(${JSON.stringify(data)})'>
+                                            <span type="button" class="dropdown-item">
+                                                <i class="fa-solid fa-pen-to-square"></i> Edit
+                                            </span>
+                                        </li>
+                                        <li onclick='deleteForm(${JSON.stringify(data)})'>
+                                            <span type="button" class="dropdown-item">
+                                                <i class="fa-solid fa-trash"></i> delete
+                                            </span>
+                                        </li>
+                                    </ul>
+                                </span>
+                                ${data.id}
+                                `;
+                                        }
+                                    },
+                                    { "data": "username" },
+                                    { "data": "fullName" },
+                                    { "data": "email" },
+                                    { "data": "phone" }
+                                ];
+                                // var source = new EventSource('<%//=apiRoutes.users%>')
+                                // var source = new EventSource('<%=//apiRoutes.users%>')
+                                // source.addEventListener('summary', function (event) {
+                                //     console.log('summary: ' + event.data);
+
+                                $('#userTable').dataTable(
+                                    {
+                                        responsive: true,
+                                        lengthChange: true,
+                                        autoWidth: false,
+                                        columns: columns,
+                                        data: users
+                                        // ajax: event.data,
+                                    }
+                                )
+                            });
+                        },
+                        error: function (data) {
+                            console.log('An error occurred.');
+                            console.log(data);
+                        },
+                    });
+                </script>
+            </div>
         </div>
-    </div>
-    <%- include('../common/footer') %>
+        <%- include('../common/footer') %>
 
 </body>
 
